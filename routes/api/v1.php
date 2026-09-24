@@ -6,10 +6,13 @@ use App\Http\Controllers\Api\V1\Auth\LogoutController;
 use App\Http\Controllers\Api\V1\Auth\RegisterUserController;
 use App\Http\Controllers\Api\V1\Catalog\DestroyProductController;
 use App\Http\Controllers\Api\V1\Catalog\IndexCategoryController;
+use App\Http\Controllers\Api\V1\Catalog\IndexProductController;
+use App\Http\Controllers\Api\V1\Catalog\SearchProductController;
 use App\Http\Controllers\Api\V1\Catalog\ShowCategoryController;
 use App\Http\Controllers\Api\V1\Catalog\ShowProductController;
 use App\Http\Controllers\Api\V1\Catalog\StoreCategoryController;
 use App\Http\Controllers\Api\V1\Catalog\StoreProductController;
+use App\Http\Controllers\Api\V1\Catalog\SuggestProductController;
 use App\Http\Controllers\Api\V1\Catalog\UpdateCategoryController;
 use App\Http\Controllers\Api\V1\Catalog\UpdateProductController;
 use App\Http\Controllers\Api\V1\HealthController;
@@ -36,6 +39,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/categories/{category}', ShowCategoryController::class)->name('categories.show');
     Route::match(['put', 'patch'], '/categories/{category}', UpdateCategoryController::class)->name('categories.update');
 
+    Route::get('/products', IndexProductController::class)->name('products.index');
+    Route::get('/products/search', SearchProductController::class)->name('products.search');
+    Route::get('/products/suggestions', SuggestProductController::class)->name('products.suggestions');
     Route::post('/products', StoreProductController::class)->name('products.store');
     Route::get('/products/{product}', ShowProductController::class)->name('products.show');
     Route::match(['put', 'patch'], '/products/{product}', UpdateProductController::class)->name('products.update');

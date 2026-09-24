@@ -9,11 +9,14 @@ services:
       DB_HOST: postgres
       REDIS_HOST: redis
       CACHE_STORE: redis
+      ELASTICSEARCH_ENABLED: "true"
       ELASTICSEARCH_HOST: http://elasticsearch:9200
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
 
   nginx:
