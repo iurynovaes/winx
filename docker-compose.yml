@@ -9,6 +9,7 @@ services:
       DB_HOST: postgres
       REDIS_HOST: redis
       CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
       ELASTICSEARCH_ENABLED: "true"
       ELASTICSEARCH_HOST: http://elasticsearch:9200
     depends_on:
