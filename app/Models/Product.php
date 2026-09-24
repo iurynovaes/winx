@@ -3,22 +3,29 @@
 namespace App\Models;
 
 use App\Domain\Catalog\Enums\ProductStatus;
-use App\Observers\ProductSearchObserver;
 use Database\Factories\ProductFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['sku', 'nome', 'descricao', 'preco', 'category_id', 'estoque', 'status'])]
-#[ObservedBy(ProductSearchObserver::class)]
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
+
+    /**
+     * @var list<string>
+     */
+    protected $fillable = [
+        'sku',
+        'nome',
+        'descricao',
+        'preco',
+        'category_id',
+        'estoque',
+        'status',
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -35,6 +42,25 @@ class Product extends Model
     }
 
     /**
+     * Capture the fields stored in the activity log.
+     *
+     * @return array{id: int, sku: string, nome: string, descricao: string|null, preco: string, category_id: int, estoque: int, status: string}
+     */
+    public function activitySnapshot(): array
+    {
+        return [
+            'id' => $this->id,
+            'sku' => $this->sku,
+            'nome' => $this->nome,
+            'descricao' => $this->descricao,
+            'preco' => $this->preco,
+            'category_id' => $this->category_id,
+            'estoque' => $this->estoque,
+            'status' => $this->status->value,
+        ];
+    }
+
+    /**
      * @return BelongsTo<Category, $this>
      */
     public function category(): BelongsTo
@@ -47,8 +73,7 @@ class Product extends Model
      *
      * @param  Builder<Product>  $query
      */
-    #[Scope]
-    protected function nomeContains(Builder $query, string $nome): void
+    public function scopeNomeContains(Builder $query, string $nome): void
     {
         $pattern = '%'.addcslashes($nome, '\\%_').'%';
         $operator = $query->getConnection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';

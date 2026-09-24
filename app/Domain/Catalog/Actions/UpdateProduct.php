@@ -2,6 +2,8 @@
 
 namespace App\Domain\Catalog\Actions;
 
+use App\Domain\Activity\Enums\ProductActivityAction;
+use App\Domain\Activity\Events\ProductChanged;
 use App\Models\Product;
 
 class UpdateProduct
@@ -18,8 +20,21 @@ class UpdateProduct
             unset($attributes['categoria_id']);
         }
 
+        $before = $product->activitySnapshot();
         $product->fill($attributes);
+
+        if (! $product->isDirty()) {
+            return $product;
+        }
+
         $product->save();
+
+        ProductChanged::dispatch(
+            ProductActivityAction::Atualizado,
+            $product->id,
+            $before,
+            $product->activitySnapshot(),
+        );
 
         return $product;
     }

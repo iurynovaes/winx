@@ -2,6 +2,8 @@
 
 namespace App\Domain\Catalog\Actions;
 
+use App\Domain\Activity\Enums\ProductActivityAction;
+use App\Domain\Activity\Events\ProductChanged;
 use App\Models\Product;
 
 class CreateProduct
@@ -13,7 +15,7 @@ class CreateProduct
      */
     public function handle(array $attributes): Product
     {
-        return Product::query()->create([
+        $product = Product::query()->create([
             'nome' => $attributes['nome'],
             'descricao' => $attributes['descricao'] ?? null,
             'preco' => $attributes['preco'],
@@ -22,5 +24,14 @@ class CreateProduct
             'estoque' => $attributes['estoque'],
             'status' => $attributes['status'],
         ]);
+
+        ProductChanged::dispatch(
+            ProductActivityAction::Criado,
+            $product->id,
+            null,
+            $product->activitySnapshot(),
+        );
+
+        return $product;
     }
 }
