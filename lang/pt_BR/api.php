@@ -2,6 +2,7 @@
 
 return [
     'unauthenticated' => 'Não autenticado.',
+    'invalid_credentials' => 'Credenciais inválidas.',
     'forbidden' => 'Acesso negado.',
     'not_found' => 'Recurso não encontrado.',
     'method_not_allowed' => 'Método não permitido.',

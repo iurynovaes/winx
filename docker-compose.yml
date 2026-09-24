@@ -8,6 +8,7 @@ services:
     environment:
       DB_HOST: postgres
       REDIS_HOST: redis
+      CACHE_STORE: redis
       ELASTICSEARCH_HOST: http://elasticsearch:9200
     depends_on:
       postgres:

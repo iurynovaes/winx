@@ -2,7 +2,7 @@
 
 API REST para gerenciamento de produtos, construída com Laravel 13.
 
-Esta etapa entrega a fundação do projeto: ambiente local, rotas versionadas em `/api/v1`, respostas JSON e tratamento de erros padronizado.
+A API já cobre a fundação (rotas `/api/v1`, JSON e erros padronizados) e a autenticação por token Bearer.
 
 ## Stack
 
@@ -45,7 +45,7 @@ Dentro do Compose, a aplicação fala com `postgres`, `redis` e `elasticsearch`.
 
 ## Subir sem Docker
 
-É preciso PHP 8.3+ com as extensões `pdo_pgsql` e `redis`, Composer, PostgreSQL e Redis nos valores do `.env.example`.
+É preciso PHP 8.3+ com a extensão `pdo_pgsql`, Composer e PostgreSQL nos valores do `.env.example`. Nesse modo o cache fica em arquivo, o que basta para o limite de tentativas de login. Com Docker, o cache usa Redis.
 
 ```bash
 composer install
@@ -65,13 +65,34 @@ php artisan test
 
 O PHPUnit usa SQLite em memória e não depende de PostgreSQL, Redis ou Elasticsearch.
 
+## Autenticação
+
+O acesso autenticado usa Laravel Sanctum. Envie o token no header `Authorization: Bearer {token}`.
+
+| Método | Rota | Acesso |
+| --- | --- | --- |
+| `POST` | `/api/v1/auth/register` | Público |
+| `POST` | `/api/v1/auth/login` | Público |
+| `GET` | `/api/v1/auth/me` | Token |
+| `POST` | `/api/v1/auth/logout` | Token |
+
+Registro e login devolvem `data.token`, `data.token_type` (`Bearer`) e `data.user`. O logout responde `204` e revoga só o token da requisição. Login e registro aceitam no máximo 5 tentativas por minuto para o mesmo e-mail e IP.
+
+O seeder cria um usuário de demonstração: `test@example.com` / `password`.
+
+```bash
+php artisan migrate --seed
+```
+
+As próximas rotas de produto entram no mesmo grupo `auth:sanctum`.
+
 ## Contrato de erro
 
 Rotas em `/api/*` respondem JSON mesmo sem o header `Accept`. O corpo de erro tem `message`. Validação (`422`) também traz `errors`. Com `APP_DEBUG=true`, uma falha inesperada inclui `debug` com a exceção e a mensagem interna.
 
 ## Organização
 
-- `app/Domain/Auth`, `app/Domain/Catalog` e `app/Domain/Activity` reservam os módulos de autenticação, produtos e logs
+- `app/Domain/Auth` registra e autentica usuários; `Catalog` e `Activity` entram nas próximas etapas
 - `app/Http` concentra controllers, Form Requests e API Resources
 - `app/Support/Api` centraliza o contrato de erro
 - `routes/api/v1.php` é a superfície da versão 1
